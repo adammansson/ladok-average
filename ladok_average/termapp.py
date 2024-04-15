@@ -35,6 +35,7 @@ def run():
     parser.add_argument('--sortby', choices=['name', 'grade', 'date'], default='date')
     parser.add_argument('--includeug', action='store_true')
     parser.add_argument('--ignoreaverage', action='store_true')
+    parser.add_argument('-y', '--year', action='store_true')
 
     args = parser.parse_args()
     input_name = args.input
@@ -43,6 +44,7 @@ def run():
     sort_by = args.sortby
     include_ug = args.includeug
     ignore_average = args.ignoreaverage
+    by_year = args.year
 
     if input_name.suffix != '.pdf':
         raise ValueError
@@ -52,7 +54,7 @@ def run():
 
     courses_list = courses.get_courses(lines_list, is_swedish, include_ug)
     info_list = info.get_info(lines_list, is_swedish)
-    stats_list = stats.get_stats(courses_list, verbose, ignore_average)
+    stats_list = stats.get_stats(courses_list, verbose, ignore_average, by_year)
 
     courses_table = courses.create_courses_table(sort_by)
     courses_table.add_all(courses_list)

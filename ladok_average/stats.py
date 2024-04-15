@@ -20,18 +20,47 @@ def __scope_from_course(course):
 
     return float(scope)
 
-def get_stats(courses, verbose, ignore_average):
-    stats = []
-    total_scope = sum(list(map(lambda course : __scope_from_course(course), courses)))
-    total_weight = sum(list(map(lambda course : __scope_from_course(course) * __grade_from_course(course), courses)))
+def __weight_from_course(course):
+    return __scope_from_course(course) * __grade_from_course(course)
+
+def __get_average(courses, total_scope):
+    total_weight = sum(list(map(lambda course : __weight_from_course(course), courses)))
     average = total_weight / total_scope
     average = round(average, 5)
 
-    if not ignore_average:
-        stats += [{
-            'statistic': 'Average grade',
-            'value': str(average),
-        }]
+    return [
+        {'statistic': 'Average grade',
+        'value': str(average)}
+    ]
+
+def __year_from_course(course):
+    return int(course['date'].split('-')[0])
+
+def __get_averages_by_year(courses):
+    year_scopes = {}
+    year_weights = {}
+
+    for course in courses:
+        year = __year_from_course(course)
+        year_scopes[year] = year_scopes.get(year, 0) + __scope_from_course(course)
+        year_weights[year] = year_weights.get(year, 0) + __weight_from_course(course)
+
+    averages = []
+    for year in sorted(year_scopes.keys()):
+        averages += [{'statistic': f'Average grade {year}',
+                     'value': str(year_weights[year] / year_scopes[year])}]
+
+    return averages
+
+def get_stats(courses, verbose, ignore_average, by_year):
+    stats = []
+    total_scope = sum(list(map(lambda course : __scope_from_course(course), courses)))
+
+    if not ignore_average and not by_year:
+        stats += __get_average(courses, total_scope)
+    
+    if not ignore_average and by_year:
+        stats += __get_averages_by_year(courses)
 
     if verbose:
         stats += [{
