@@ -23,10 +23,12 @@ def __scope_from_course(course):
 def __weight_from_course(course):
     return __scope_from_course(course) * __grade_from_course(course)
 
+def __calculate_average(weight, scope):
+    return round(weight / scope, 5)
+
 def __get_average(courses, total_scope):
     total_weight = sum(list(map(lambda course : __weight_from_course(course), courses)))
-    average = total_weight / total_scope
-    average = round(average, 5)
+    average = __calculate_average(total_weight, total_scope)
 
     return [
         {'statistic': 'Average grade',
@@ -47,8 +49,9 @@ def __get_averages_by_year(courses):
 
     averages = []
     for year in sorted(year_scopes.keys()):
+        average = __calculate_average(year_weights[year], year_scopes[year])
         averages += [{'statistic': f'Average grade {year}',
-                     'value': str(year_weights[year] / year_scopes[year])}]
+                     'value': str(average)}]
 
     return averages
 
